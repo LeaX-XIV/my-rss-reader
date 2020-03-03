@@ -1,7 +1,17 @@
 #! python3
 
-from liveconsole import LiveConsole
+from feedmanager import FeedManager
 
 if __name__ == "__main__":
-	lc = LiveConsole()
-	lc.start()
+	fm = FeedManager()
+
+#
+# COMMANDS
+#
+# - add  <link> <name>
+# - edit <name> <newLink>
+# - del  <name>
+# - list
+# - open <name>
+# - update [<name>]
+#

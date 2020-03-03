@@ -6,7 +6,7 @@ from datetime import datetime
 import xml.etree.ElementTree as ET
 import shelve
 
-from variables import XSLT_PATH_FROM_XML
+from constants import XSLT_PATH_FROM_XML
 
 
 class Feed:
@@ -18,7 +18,7 @@ class Feed:
 		 "etag": None
 	}
 
-	def __init__(self, feed_link, name, curr_dir, last_modified=None, etag=None):
+	def __init__(self, feed_link, name, curr_dir, print_fnc, last_modified=None, etag=None):
 		"""Constructor method. Creates directory in curr_dir/name
 
 		:param feed_link: URL of the feed
@@ -34,6 +34,7 @@ class Feed:
 		self.data_path = os.path.join(self.dir, "data.bin")
 		self.feed_path = os.path.join(self.dir, "rss.xml")
 		self.feed_mod_path = os.path.join(self.dir, "myFeed.xml")
+		self.print = print_fnc
 		self.last_modified = last_modified or Feed.default_settings["last_modified"]
 		self.etag = etag or Feed.default_settings["etag"]
 		self.init()
@@ -58,7 +59,7 @@ class Feed:
 		return
 	
 	@classmethod
-	def from_shelve(cls, shelve_path):
+	def from_shelve(cls, shelve_path, print_fnc):
 		"""Loads a Feed object previously saved with shelve library
 
 		:param shelve_path: path and name of shelve files w/o extension
@@ -70,6 +71,7 @@ class Feed:
 				# Use shelve_path to get saving path
 				name = os.path.basename(os.path.dirname(shelve_path)),
 				curr_dir = os.path.dirname(os.path.dirname(shelve_path)),
+				print_fnc = print_fnc,
 				last_modified = sf["last_modified"],
 				etag = sf["etag"],
 			)
@@ -175,10 +177,10 @@ class Feed:
 		# Make GET request and store Response
 		try:
 			response = self.get()
-			print("\r" + str(datetime.now())[:19] + " " +  self.name + " " + str(response.status_code))
+			self.print(" ".join([str(datetime.now())[:19], self.name, str(response.status_code)]))
 			response.raise_for_status()
 		except:
-			# print(traceback.format_exc())
+			# self.print(traceback.format_exc())
 			return
 
 		updated = self.update_HTTP_variables(response)
@@ -186,20 +188,23 @@ class Feed:
 			
 			different = self.is_new_different(response.text)
 			if different:
-				#save new content
-				self.feed_content = response.text
-				with open(self.feed_path, "w", encoding="utf-8") as feed:
-					feed.write(self.feed_content)
-				self.feed_etree = ET.fromstring(self.feed_content).find("channel")
+				try:
+					#save new content
+					self.feed_content = response.text
+					with open(self.feed_path, "w", encoding="utf-8") as feed:
+						feed.write(self.feed_content)
+					self.feed_etree = ET.fromstring(self.feed_content).find("channel")
 
-				n = self.modify_content()
-				print("\r" + str(n) + " new items in " +self.name + ".")
+					n = self.modify_content()
+					self.print(str(n) + " new items in " + self.name + ".")
 
 
-				# generaten n notifications
-				# send notifications in new thread
+					# generaten n notifications
+					# send notifications in new thread
 
-				self.save_shelve()
+					self.save_shelve()
+				except FileNotFoundError as e:
+					raise e
 
 
 

@@ -36,7 +36,7 @@ class Repeater:
 		# Execute if now == True
 		if now == True:
 			if "args" in dct:
-				dct["action"](dct["args"])
+				dct["action"](*dct["args"])
 			else:
 				dct["action"]()
 				
