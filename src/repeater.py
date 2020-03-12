@@ -61,7 +61,7 @@ class Repeater:
 		# Execute the task
 		if "args" in dct:
 			# With arguments
-			dct["action"](dct["args"])
+			dct["action"](*dct["args"])
 		else:
 			# Without arguments
 			dct["action"]()
@@ -69,9 +69,22 @@ class Repeater:
 		if dct["ttl"] > 0:
 			# Decrement ttl if positive
 			dct["ttl"] -= 1
-		if dct["ttl"] != 0:
+		if dct["ttl"] == 0:
 			# If in this iteration ttl reached 0, delete it from the array
 			self.actions.remove(dct)
 		else:
 			# Else, re-schedulet it
 			self.s.enter(dct["delay"], dct["priority"], self._execute, argument=(dct,))
+
+if __name__ == "__main__":
+	import time
+	from sched import scheduler
+
+	def p(s):
+		print(s)
+
+	s = scheduler(time.time, time.sleep)
+	r = Repeater(s)
+
+	r.add(p, 5, -1, True, 1, 'a')
+	r.start()
