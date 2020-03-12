@@ -4,7 +4,6 @@ import webbrowser
 
 class LiveConsole:
 
-
 	def __init__(self):
 		self.prompt = ">"
 		self.commands = {}
@@ -34,7 +33,7 @@ class LiveConsole:
 			return False
 
 	def live_print(self, line, nl=True):
-		print("\r" + str(line), end="")
+		print(f"\r{str(line)}", end="")
 		if nl:
 			print("")
-			print(self.prompt + " ", end="", flush=True)
+			print(f"{self.prompt} ", end="", flush=True)

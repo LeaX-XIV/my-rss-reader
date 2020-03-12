@@ -44,7 +44,7 @@ class FeedManager:
 		# for feed in self.feeds.values():
 			# TODO Change to use self.force_update
 			# self.repeater.add((self.force_update), 10*60, 1, True, 1, feed.name)
-		self.repeater.add((self.force_update), 10*60, 1, True, 1, None)
+		self.repeater.add(self.force_update, 10*60, -1, True, 1, None)
 
 		t = Thread(target=(self.repeater.start), daemon=True)
 		t.start()
@@ -60,9 +60,11 @@ class FeedManager:
 			os.makedirs(self.dir)
 
 		if not os.path.exists(os.path.join(self.dir, XSLT_PATH)):
+			# TODO: Also check contents of file
 			with open(os.path.join(self.dir, XSLT_PATH), "w") as f:
 				f.write(XSLT_CONTENT)
 		if not os.path.exists(os.path.join(self.dir, CSS_PATH)):
+			# TODO: Also check contents of file
 			with open(os.path.join(self.dir, CSS_PATH), "w") as f:
 				f.write(CSS_CONTENT)
 
@@ -79,21 +81,21 @@ class FeedManager:
 		return self.edit_feed_link(name, newlink)
 
 	def delete(self, name):
-		self.lc.live_print("Are you sure you want to delete " + name + "? This action cannot be undone (Y/n): ", nl=False)
+		self.lc.live_print(f"Are you sure you want to delete {name}? This action cannot be undone (Y/n): ", nl=False)
 		r = input("")
 		if r == "Y":
 			if self.delete_feed(name):
-				self.lc.live_print("Feed " + name + " successfully removed.")
+				self.lc.live_print(f"Feed {name} successfully removed.")
 				return True
 			else:
-				self.lc.live_print("Error while deleting feed " + name + ". Aborted.")
+				self.lc.live_print(f"Error while deleting feed {name}. Aborted.")
 				return False
 		self.lc.live_print("Action canceled")
 		return False
 
 	def listAll(self):
 		feeds = self.get_all_feeds()
-		for feed, link in feeds.items(): self.lc.live_print(feed + "\t-> " + link)
+		for feed, link in feeds.items(): self.lc.live_print(f"{feed}\t-> {link}")
 		if(len(feeds.keys()) == 0): self.lc.live_print("No feeds watched at the moment.")
 
 	def openAll(self):
@@ -101,7 +103,7 @@ class FeedManager:
 		pass
 
 	def open(self, name):
-		webbrowser.open("http://127.0.0.1:8080/" + name + "/myFeed.xml")
+		webbrowser.open(f"http://127.0.0.1:8080/{name}/myFeed.xml")
 
 	def updateAll(self):
 		return self.force_update(None)
@@ -155,7 +157,7 @@ class FeedManager:
 				try:
 					v.update()
 				except FileNotFoundError:
-					self.lc.live_print("Error during update on feed " + k + ". Proceding with deletion.")
+					self.lc.live_print(f"Error during update on feed {k}. Proceding with deletion.")
 					to_delete.append(k)
 		
 		for error_feed in to_delete:

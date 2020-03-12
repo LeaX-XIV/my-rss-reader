@@ -164,7 +164,7 @@ class Feed:
 		finally:
 			final_text = ET.tostring(feed, encoding="utf-8")
 			with open(self.feed_mod_path, "w", encoding="utf-8") as feed_mod:
-				feed_mod.write("<?xml-stylesheet type=\"text/xsl\" href=\"" + XSLT_PATH_FROM_XML + "\"?>\n")
+				feed_mod.write(f"<?xml-stylesheet type=\"text/xsl\" href=\"{XSLT_PATH_FROM_XML}\"?>\n")
 				feed_mod.write(final_text.decode("utf-8"))
 		
 		return new
@@ -177,7 +177,7 @@ class Feed:
 		# Make GET request and store Response
 		try:
 			response = self.get()
-			self.print(" ".join([str(datetime.now())[:19], self.name, str(response.status_code)]))
+			self.print(f"{str(datetime.now())[:19]} {self.name} {str(response.status_code)}")
 			response.raise_for_status()
 		except:
 			# self.print(traceback.format_exc())
@@ -196,7 +196,7 @@ class Feed:
 					self.feed_etree = ET.fromstring(self.feed_content).find("channel")
 
 					n = self.modify_content()
-					self.print(str(n) + " new items in " + self.name + ".")
+					self.print(f"{str(n)} new items in {self.name}.")
 
 
 					# generaten n notifications
