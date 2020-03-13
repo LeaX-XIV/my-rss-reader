@@ -41,9 +41,6 @@ class FeedManager:
 		self.lc = LiveConsole()
 		self.setup_workspace()
 		
-		# for feed in self.feeds.values():
-			# TODO Change to use self.force_update
-			# self.repeater.add((self.force_update), 10*60, 1, True, 1, feed.name)
 		self.repeater.add(self.force_update, 10*60, -1, True, 1, None)
 
 		t = Thread(target=(self.repeater.start), daemon=True)
@@ -59,12 +56,10 @@ class FeedManager:
 		if not os.path.exists(self.dir):
 			os.makedirs(self.dir)
 
-		if not os.path.exists(os.path.join(self.dir, XSLT_PATH)):
-			# TODO: Also check contents of file
+		if not os.path.exists(os.path.join(self.dir, XSLT_PATH)) or XSLT_CONTENT != open(os.path.join(self.dir, XSLT_PATH), "r").read():
 			with open(os.path.join(self.dir, XSLT_PATH), "w") as f:
 				f.write(XSLT_CONTENT)
-		if not os.path.exists(os.path.join(self.dir, CSS_PATH)):
-			# TODO: Also check contents of file
+		if not os.path.exists(os.path.join(self.dir, CSS_PATH)) or CSS_CONTENT != open(os.path.join(self.dir, CSS_PATH), "r").read():
 			with open(os.path.join(self.dir, CSS_PATH), "w") as f:
 				f.write(CSS_CONTENT)
 
@@ -99,7 +94,7 @@ class FeedManager:
 		if(len(feeds.keys()) == 0): self.lc.live_print("No feeds watched at the moment.")
 
 	def openAll(self):
-		# TODO
+		# TODO: Implement
 		pass
 
 	def open(self, name):
@@ -122,9 +117,6 @@ class FeedManager:
 			if name:
 				new_feed = Feed(link, name, self.dir, self.lc.live_print)
 				self.feeds[name] = new_feed
-				# TODO Change to use self.force_update
-				# self.repeater.add((new_feed.update), 10*60, 1, now=True)
-				# self.repeater.add((self.force_update), 10*60, 1, True, 1, new_feed.name)
 				self.force_update(new_feed.name)
 				return True
 		return False
